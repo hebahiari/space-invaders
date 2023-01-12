@@ -17,7 +17,7 @@ YELLOW = (225, 255, 0)
 
 FPS = 60
 VEL = 5
-BULLET_VEL = 7
+ACCELERATION = 1.5
 MAX_BULLETS = 3
 
 # EVENTS
@@ -39,6 +39,7 @@ MINE_DIM = 50
 COIN_DIM = 30
 JEWEL_DIM = 40
 CLOCK_DIM = 30
+EXPLOSION_DIM = 60
 
 ROCKET_IMAGE = pygame.image.load(
     os.path.join('Assets', 'rocket1.png'))
@@ -47,8 +48,8 @@ ROCKET = pygame.transform.rotate(pygame.transform.scale(
 
 MINE_IMAGE = pygame.image.load(
     os.path.join('Assets', 'mine.png'))
-MINE = pygame.transform.rotate(pygame.transform.scale(
-    MINE_IMAGE, (MINE_DIM, MINE_DIM)), 270)
+MINE = pygame.transform.scale(
+    MINE_IMAGE, (MINE_DIM, MINE_DIM))
 
 COIN_IMAGE = pygame.image.load(
     os.path.join('Assets', 'coin.png'))
@@ -64,6 +65,11 @@ CLOCK_IMAGE = pygame.image.load(
     os.path.join('Assets', 'jewel.png'))
 CLOCK = pygame.transform.scale(
     CLOCK_IMAGE, (CLOCK_DIM, CLOCK_DIM))
+
+EXPLOSION_IMAGE = pygame.image.load(
+    os.path.join('Assets', 'explosion.png'))
+EXPLOSION = pygame.transform.scale(
+    EXPLOSION_IMAGE, (EXPLOSION_DIM, EXPLOSION_DIM))
 
 SPACE = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'wallpaper.jpg')), (WIDTH, HEIGHT))
@@ -93,7 +99,7 @@ START_SOUND = pygame.mixer.Sound(
 
 # OTHER IMPORTS
 
-MAIN_FONT = pygame.font.SysFont('pixel', 40)
+MAIN_FONT = pygame.font.SysFont('consolas', 30)
 
 # FUNCTION DEFINITIONS
 
@@ -106,7 +112,8 @@ def draw_window(rocket, mines, jewels, coins, score
     score_text = MAIN_FONT.render(
         "Score: " + str(score), 1, WHITE)
 
-    WIN.blit(score_text, (10, 10))
+    WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
+             2, 10))
 
     # WIN.blit() adds items to the screen like text or objects
     WIN.blit(ROCKET, (rocket.x, rocket.y))
@@ -123,16 +130,16 @@ def draw_window(rocket, mines, jewels, coins, score
     pygame.display.update()
 
 
-def rocket_handle_movement(keys_pressed, rocket):
-    if keys_pressed[pygame.K_UP] and rocket.y - VEL > 0:  # UP
-        rocket.y -= VEL
-    if keys_pressed[pygame.K_DOWN] and rocket.y + VEL + rocket.height < HEIGHT:  # DOWN
-        rocket.y += VEL
+def rocket_handle_movement(keys_pressed, rocket, vel):
+    if keys_pressed[pygame.K_UP] and rocket.y - vel > 0:  # UP
+        rocket.y -= vel
+    if keys_pressed[pygame.K_DOWN] and rocket.y + vel + rocket.height < HEIGHT:  # DOWN
+        rocket.y += vel
 
 
-def handle_mines(mines, rocket):
+def handle_mines(mines, rocket, vel):
     for mine in mines:
-        mine.x -= VEL
+        mine.x -= vel
         if mine.x < 0 - MINE_DIM:
             mines.remove(mine)
         if rocket.colliderect(mine):
@@ -142,9 +149,9 @@ def handle_mines(mines, rocket):
             # yellow_bullets.remove(bullet)
 
 
-def handle_jewels(jewels, rocket):
+def handle_jewels(jewels, rocket, vel):
     for jewel in jewels:
-        jewel.x -= VEL
+        jewel.x -= vel
         if jewel.x < 0 - JEWEL_DIM:
             jewels.remove(jewel)
         if rocket.colliderect(jewel):
@@ -153,9 +160,9 @@ def handle_jewels(jewels, rocket):
             jewels.remove(jewel)
 
 
-def handle_coins(coins, rocket):
+def handle_coins(coins, rocket, vel):
     for coin in coins:
-        coin.x -= VEL
+        coin.x -= vel
         if coin.x < 0 - COIN_DIM:
             coins.remove(coin)
         if rocket.colliderect(coin):
@@ -164,10 +171,13 @@ def handle_coins(coins, rocket):
             coins.remove(coin)
 
 
-def draw_lost(text):
+def draw_lost(text, explosion, rocket, vel):
     draw_text = MAIN_FONT.render(text, 1, WHITE)
     WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() //
              2, HEIGHT/2 - draw_text.get_height()//2))
+    WIN.blit(EXPLOSION, (explosion.x, explosion.y))
+    while rocket.y < 400:
+        rocket.y += vel
     pygame.display.update()
     pygame.time.delay(5000)
 
@@ -226,16 +236,17 @@ def main():
 
             if event.type == MINE_HIT:
                 LOSE_SOUND.play()
-                draw_lost("you lost!")
-                pygame.quit()
-                break
+                explosion = pygame.Rect(
+                    rocket.x + ROCKET_WIDTH - 10, rocket.y, EXPLOSION_DIM, EXPLOSION_DIM)
+                draw_lost("you lost!", explosion, rocket, vel)
+                main()
 
         keys_pressed = pygame.key.get_pressed()
-        rocket_handle_movement(keys_pressed, rocket)
+        rocket_handle_movement(keys_pressed, rocket, vel)
 
-        handle_mines(mines, rocket)
-        handle_jewels(jewels, rocket)
-        handle_coins(coins, rocket)
+        handle_mines(mines, rocket, vel)
+        handle_jewels(jewels, rocket, vel)
+        handle_coins(coins, rocket, vel)
 
         draw_window(rocket, mines, jewels, coins, score
                     )
