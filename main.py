@@ -15,7 +15,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (225, 255, 0)
 
-FPS = 1
+FPS = 60
 VEL = 5
 BULLET_VEL = 7
 MAX_BULLETS = 3
@@ -96,7 +96,7 @@ MAIN_FONT = pygame.font.SysFont('pixel', 40)
 # FUNCTION DEFINITIONS
 
 
-def draw_window(rocket, mine, red_bullets, yellow_bullets
+def draw_window(rocket, mines, red_bullets, yellow_bullets
                 ):
     WIN.blit(SPACE, (0, 0))
     # pygame.draw.rect(WIN, BLACK, BARRIER)
@@ -116,6 +116,13 @@ def draw_window(rocket, mine, red_bullets, yellow_bullets
 
     for bullet in yellow_bullets:
         pygame.draw.rect(WIN, YELLOW, bullet)
+
+    for mine in mines:
+        WIN.blit(MINE, (mine.x, mine.y))
+        mine.x -= VEL
+        if mine.x < 0 - MINE_DIM:
+            mines.remove(mine)
+        print(mines)
 
     pygame.display.update()
 
@@ -145,24 +152,15 @@ def draw_winner(text):
     pygame.time.delay(5000)
 
 
-def draw_mine(mine):
-    y = random.choice(range(10, 490))
-    WIN.blit(MINE, (mine.x, mine.y))
-    print("mine created")
-    # while mine.x > 0:
-    #     mine.x -= VEL
-
-
 def main():
 
     pygame.time.set_timer(CREATE_MINE, random.randrange(2000, 3500))
     # pycame.Rect() to basically define a rectangle to represent our object
     rocket = pygame.Rect(100, 350, ROCKET_WIDTH, ROCKET_HEIGHT)
 
-    mine = pygame.Rect(120, 120, MINE_DIM, MINE_DIM)
-
     red_bullets = []
     yellow_bullets = []
+    mines = []
 
     clock = pygame.time.Clock()
     run = True
@@ -183,7 +181,8 @@ def main():
                 TIMER_SOUND.play()
 
             if event.type == CREATE_MINE:
-                draw_mine(mine)
+                y = random.choice(range(10, 490))
+                mines.append(pygame.Rect(900, y, MINE_DIM, MINE_DIM))
 
             if event.type == MINE_HIT:
                 LOSE_SOUND.play()
@@ -195,7 +194,7 @@ def main():
 
         handle_bullets(yellow_bullets, red_bullets, rocket)
 
-        draw_window(rocket, mine, red_bullets, yellow_bullets
+        draw_window(rocket, mines, red_bullets, yellow_bullets
                     )
 
     main()
