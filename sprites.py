@@ -12,6 +12,7 @@ WIDTH, HEIGHT = 900, 500
 
 WHITE = (255, 255, 255)
 STARTING_VELOCITY = 5
+ACCELERATION = 1.0005
 
 # EVENTS
 
@@ -156,7 +157,7 @@ class Rocketship(pygame.sprite.Sprite):
                                2, 10))
 
         # increasing velocity
-        self.vel += .001
+        self.vel *= ACCELERATION
 
 
 class Mine(pygame.sprite.Sprite):

@@ -60,6 +60,7 @@ def main():
     pygame.time.set_timer(CREATE_CLOCK, 13000)
 
 # rocketship
+
     rocketship = Rocketship(100, 250)
     rocketship_group = pygame.sprite.Group()
     rocketship_group.add(rocketship)
@@ -99,7 +100,7 @@ def main():
                 rocketship.vel = rocketship.vel * 1.5
 
             if event.type == CLOCK_START:
-                pygame.time.set_timer(CLOCK_END, 4000, 1)
+                pygame.time.set_timer(CLOCK_END, 3000, 1)
 
             if event.type == MINE_HIT:
                 main()
