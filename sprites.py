@@ -1,24 +1,16 @@
 import pygame
 import os
 import random
-import sys
 
 pygame.font.init()
 pygame.mixer.init()
 
 
 WIDTH, HEIGHT = 900, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Space Invaders")
 
 # CONSTANTS
 
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-YELLOW = (225, 255, 0)
-
-FPS = 60
 STARTING_VELOCITY = 5
 
 # EVENTS
@@ -39,79 +31,72 @@ JEWEL_DIM = 40
 CLOCK_DIM = 30
 EXPLOSION_DIM = 60
 
-
-ROCKET_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'rocket.png'))
 ROCKET = pygame.transform.scale(
-    ROCKET_IMAGE, (ROCKET_WIDTH, ROCKET_HEIGHT))
+    pygame.image.load(
+        os.path.join('graphics', 'rocket.png')), (ROCKET_WIDTH, ROCKET_HEIGHT))
 
-MINE_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'mine.png'))
+ROCKET_UP = pygame.transform.rotate(ROCKET, 10)
+ROCKET_DOWN = pygame.transform.rotate(ROCKET, -10)
+
 MINE = pygame.transform.scale(
-    MINE_IMAGE, (MINE_DIM, MINE_DIM))
+    pygame.image.load(
+        os.path.join('graphics', 'mine.png')), (MINE_DIM, MINE_DIM))
 
-COIN_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'coin.png'))
 COIN = pygame.transform.scale(
-    COIN_IMAGE, (COIN_DIM, COIN_DIM))
+    pygame.image.load(
+        os.path.join('graphics', 'coin.png')), (COIN_DIM, COIN_DIM))
 
-JEWEL_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'jewel.png'))
 JEWEL = pygame.transform.scale(
-    JEWEL_IMAGE, (JEWEL_DIM, JEWEL_DIM))
+    pygame.image.load(
+        os.path.join('graphics', 'jewel.png')), (JEWEL_DIM, JEWEL_DIM))
 
-CLOCK_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'jewel.png'))
 CLOCK = pygame.transform.scale(
-    CLOCK_IMAGE, (CLOCK_DIM, CLOCK_DIM))
+    pygame.image.load(
+        os.path.join('graphics', 'jewel.png')), (CLOCK_DIM, CLOCK_DIM))
+
+EXPLOSION = pygame.transform.scale(
+    pygame.image.load(
+        os.path.join('graphics', 'explosion.png')), (EXPLOSION_DIM, EXPLOSION_DIM))
 
 
 SPACE = pygame.transform.scale(pygame.image.load(
-    os.path.join('Assets', 'wallpaper.jpg')), (WIDTH, HEIGHT))
+    os.path.join('graphics', 'wallpaper.jpg')), (WIDTH, HEIGHT))
 
 # SOUND IMPORTS
 
 BACKGROUND_MUSIC = pygame.mixer.Sound(
-    os.path.join('Assets', 'background-music.wav'))
+    os.path.join('sound', 'background-music.wav'))
 
 COIN_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'coin.wav'))
+    os.path.join('sound', 'coin.wav'))
 
 TIMER_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'timer.wav'))
+    os.path.join('sound', 'timer.wav'))
 
 COUNTDOWN_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'contdown.wav'))
+    os.path.join('sound', 'contdown.wav'))
 
 JEWEL_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'jewel.wav'))
+    os.path.join('sound', 'jewel.wav'))
 
 LOSE_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'lose.wav'))
+    os.path.join('sound', 'lose.wav'))
 
 START_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'start.wav'))
+    os.path.join('sound', 'start.wav'))
+
+LOSE_SOUND = pygame.mixer.Sound(
+    os.path.join('sound', 'lose.wav'))
 
 # OTHER IMPORTS
 
 MAIN_FONT = pygame.font.SysFont('consolas', 30)
 
-EXPLOSION_IMAGE = pygame.image.load(
-    os.path.join('Assets', 'explosion.png'))
-EXPLOSION = pygame.transform.scale(
-    EXPLOSION_IMAGE, (EXPLOSION_DIM, EXPLOSION_DIM))
-
-
-LOSE_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'lose.wav'))
-
 
 class Rocketship(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__()
-        self.image = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join('Assets', 'rocket.png')), (ROCKET_WIDTH, ROCKET_HEIGHT))
+        self.image = ROCKET
         self.rect = self.image.get_rect()
         self.rect.center = [pos_x, pos_y]
         self.score = 0
@@ -142,13 +127,17 @@ class Rocketship(pygame.sprite.Sprite):
             JEWEL_SOUND.play()
             self.score += 5
 
-    def update(self):
+    def update(self, WIN):
         # moving:
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_UP] and self.rect.y - self.vel > 0:  # UP
             self.rect.y -= self.vel
-        if keys_pressed[pygame.K_DOWN] and self.rect.y + self.vel + self.rect.height < HEIGHT:  # DOWN
+            self.image = ROCKET_UP
+        elif keys_pressed[pygame.K_DOWN] and self.rect.y + self.vel + self.rect.height < HEIGHT:  # DOWN
             self.rect.y += self.vel
+            self.image = ROCKET_DOWN
+        else:
+            self.image = ROCKET
 
         # rendering score:
         score_text = MAIN_FONT.render(
@@ -164,9 +153,7 @@ class Rocketship(pygame.sprite.Sprite):
 class Mine(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join('Assets', 'mine.png')), (MINE_DIM, MINE_DIM))
+        self.image = MINE
         self.rect = self.image.get_rect()
         self.rect.center = [900, random.choice(range(10, 490))
                             ]
@@ -180,9 +167,7 @@ class Mine(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join('Assets', 'coin.png')), (COIN_DIM, COIN_DIM))
+        self.image = COIN
         self.rect = self.image.get_rect()
         self.rect.center = [900, random.choice(range(10, 490))
                             ]
@@ -196,9 +181,7 @@ class Coin(pygame.sprite.Sprite):
 class Jewel(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(
-            pygame.image.load(
-                os.path.join('Assets', 'jewel.png')), (JEWEL_DIM, JEWEL_DIM))
+        self.image = JEWEL
         self.rect = self.image.get_rect()
         self.rect.center = [900, random.choice(range(10, 490))
                             ]

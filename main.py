@@ -1,6 +1,5 @@
 import pygame
 import os
-import random
 import sys
 from sprites import Rocketship, Mine, Coin, Jewel
 
@@ -29,18 +28,18 @@ CREATE_COIN = pygame.USEREVENT + 7
 # IMAGE IMPORTS
 
 SPACE = pygame.transform.scale(pygame.image.load(
-    os.path.join('Assets', 'wallpaper.jpg')), (WIDTH, HEIGHT))
+    os.path.join('graphics', 'wallpaper.jpg')), (WIDTH, HEIGHT))
 
 # SOUND IMPORTS
 
 BACKGROUND_MUSIC = pygame.mixer.Sound(
-    os.path.join('Assets', 'background-music.wav'))
+    os.path.join('sound', 'background-music.wav'))
 
 COUNTDOWN_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'contdown.wav'))
+    os.path.join('sound', 'contdown.wav'))
 
 START_SOUND = pygame.mixer.Sound(
-    os.path.join('Assets', 'start.wav'))
+    os.path.join('sound', 'start.wav'))
 
 # OTHER IMPORTS
 
@@ -53,7 +52,7 @@ def draw_window(rocketship_group, mines_group, coins_group, jewels_group, rocket
                 ):
     WIN.blit(SPACE, (0, 0))
     rocketship_group.draw(WIN)
-    rocketship_group.update()
+    rocketship_group.update(WIN)
     mines_group.draw(WIN)
     coins_group.draw(WIN)
     jewels_group.draw(WIN)
