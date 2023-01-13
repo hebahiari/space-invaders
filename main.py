@@ -2,7 +2,7 @@ import pygame
 import os
 import random
 import sys
-from sprites import Rocketship, Mine
+from sprites import Rocketship, Mine, Coin
 
 pygame.font.init()
 pygame.mixer.init()
@@ -22,7 +22,6 @@ YELLOW = (225, 255, 0)
 FPS = 60
 # vel = 5
 ACCELERATION = 1.5
-MAX_BULLETS = 3
 
 # EVENTS
 
@@ -105,25 +104,22 @@ MAIN_FONT = pygame.font.SysFont('consolas', 30)
 # FUNCTION DEFINITIONS
 
 
-def draw_window(jewels, coins, score, rocketship_group, mines_group
+def draw_window(jewels, coins, score, rocketship_group, mines_group, coins_group
                 ):
     WIN.blit(SPACE, (0, 0))
     # pygame.draw.rect(WIN, BLACK, BARRIER)
     rocketship_group.draw(WIN)
+    rocketship_group.update()
     mines_group.draw(WIN)
+    coins_group.draw(WIN)
     mines_group.update()
+    coins_group.update()
 
-    score_text = MAIN_FONT.render(
-        "Score: " + str(score), 1, WHITE)
+    # score_text = MAIN_FONT.render(
+    #     "Score: " + str(score), 1, WHITE)
 
-    WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
-             2, 10))
-
-    for jewel in jewels:
-        WIN.blit(JEWEL, (jewel.x, jewel.y))
-
-    for coin in coins:
-        WIN.blit(COIN, (coin.x, coin.y))
+    # WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
+    #          2, 10))
 
     pygame.display.update()
 
@@ -137,29 +133,6 @@ def handle_jewels(jewels, rocket, vel):
             JEWEL_SOUND.play()
             pygame.event.post(pygame.event.Event(JEWEL_COLLECT))
             jewels.remove(jewel)
-
-
-def handle_coins(coins, rocket, vel):
-    for coin in coins:
-        coin.x -= vel
-        if coin.x < 0 - COIN_DIM:
-            coins.remove(coin)
-        if rocket.colliderect(coin):
-            COIN_SOUND.play()
-            pygame.event.post(pygame.event.Event(COIN_COLLECT))
-            coins.remove(coin)
-
-
-def draw_lost(text, explosion, rocket, vel):
-    draw_text = MAIN_FONT.render(text, 1, WHITE)
-    WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() //
-             2, HEIGHT/2 - draw_text.get_height()//2))
-    WIN.blit(EXPLOSION, (explosion.x, explosion.y))
-
-    while rocket.y < 400:
-        rocket.y += vel
-    pygame.display.update()
-    pygame.time.delay(5000)
 
 
 def draw_winner(text):
@@ -193,6 +166,9 @@ def main():
 # mines
     mines_group = pygame.sprite.Group()
 
+# coins
+    coins_group = pygame.sprite.Group()
+
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -215,25 +191,23 @@ def main():
                 score += 5
 
             if event.type == CREATE_MINE:
-                # mines.append(pygame.Rect(900, y, MINE_DIM, MINE_DIM))
                 mines_group.add(Mine())
 
             if event.type == CREATE_JEWEL:
-                y = random.choice(range(10, 490))
-                jewels.append(pygame.Rect(900, y, JEWEL_DIM, JEWEL_DIM))
+                coins_group.add(Coin())
 
             if event.type == CREATE_COIN:
-                y = random.choice(range(10, 490))
-                coins.append(pygame.Rect(900, y, COIN_DIM, COIN_DIM))
+                coins_group.add(Coin())
 
             if event.type == MINE_HIT:
                 main()
 
         rocketship.move(vel, mines_group)
         rocketship.handle_mine_collision(mines_group, WIN)
-        handle_jewels(jewels, rocket, vel)
-        handle_coins(coins, rocket, vel)
-        draw_window(jewels, coins, score, rocketship_group, mines_group
+        rocketship.handle_coin_pickup(coins_group)
+        # handle_jewels(jewels, rocket, vel)
+        # handle_coins(coins, rocket, vel)
+        draw_window(jewels, coins, score, rocketship_group, mines_group, coins_group
                     )
 
     main()

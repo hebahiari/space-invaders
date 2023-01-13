@@ -119,6 +119,7 @@ class Rocketship(pygame.sprite.Sprite):
                 os.path.join('Assets', 'rocket.png')), (ROCKET_WIDTH, ROCKET_HEIGHT))
         self.rect = self.image.get_rect()
         self.rect.center = [pos_x, pos_y]
+        self.score = 0
 
     def move(self, vel, mines_group):
         keys_pressed = pygame.key.get_pressed()
@@ -142,6 +143,19 @@ class Rocketship(pygame.sprite.Sprite):
             pygame.time.delay(5000)
             pygame.event.post(pygame.event.Event(MINE_HIT))
 
+    def handle_coin_pickup(self, coins_group):
+        if pygame.sprite.spritecollide(self, coins_group, True):
+            COIN_SOUND.play()
+            self.score += 1
+            print(self.score)
+
+    def update(self):
+        score_text = MAIN_FONT.render(
+            "Score: " + str(self.score), 1, WHITE)
+
+        WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
+                               2, 10))
+
 
 class Mine(pygame.sprite.Sprite):
     def __init__(self):
@@ -149,6 +163,22 @@ class Mine(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(
             pygame.image.load(
                 os.path.join('Assets', 'mine.png')), (MINE_DIM, MINE_DIM))
+        self.rect = self.image.get_rect()
+        self.rect.center = [800, random.choice(range(10, 490))
+                            ]
+
+    def update(self):
+        self.rect.x -= 5
+        if self.rect.right <= -100:
+            self.kill()
+
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(
+            pygame.image.load(
+                os.path.join('Assets', 'coin.png')), (COIN_DIM, COIN_DIM))
         self.rect = self.image.get_rect()
         self.rect.center = [800, random.choice(range(10, 490))
                             ]
