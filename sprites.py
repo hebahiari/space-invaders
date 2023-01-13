@@ -16,9 +16,12 @@ STARTING_VELOCITY = 5
 # EVENTS
 
 MINE_HIT = pygame.USEREVENT + 1
-CREATE_MINE = pygame.USEREVENT + 5
-CREATE_JEWEL = pygame.USEREVENT + 6
-CREATE_COIN = pygame.USEREVENT + 7
+CREATE_MINE = pygame.USEREVENT + 2
+CREATE_JEWEL = pygame.USEREVENT + 3
+CREATE_COIN = pygame.USEREVENT + 4
+CREATE_CLOCK = pygame.USEREVENT + 5
+CLOCK_START = pygame.USEREVENT + 6
+CLOCK_END = pygame.USEREVENT + 7
 
 # IMPORTS
 
@@ -52,7 +55,7 @@ JEWEL = pygame.transform.scale(
 
 CLOCK = pygame.transform.scale(
     pygame.image.load(
-        os.path.join('graphics', 'jewel.png')), (CLOCK_DIM, CLOCK_DIM))
+        os.path.join('graphics', 'clock.png')), (CLOCK_DIM, CLOCK_DIM))
 
 EXPLOSION = pygame.transform.scale(
     pygame.image.load(
@@ -127,6 +130,12 @@ class Rocketship(pygame.sprite.Sprite):
             JEWEL_SOUND.play()
             self.score += 5
 
+    def handle_clock_pickup(self, clocks_group):
+        if pygame.sprite.spritecollide(self, clocks_group, True):
+            TIMER_SOUND.play()
+            self.vel = self.vel/1.5
+            pygame.event.post(pygame.event.Event(CLOCK_START))
+
     def update(self, WIN):
         # moving:
         keys_pressed = pygame.key.get_pressed()
@@ -155,7 +164,7 @@ class Mine(pygame.sprite.Sprite):
         super().__init__()
         self.image = MINE
         self.rect = self.image.get_rect()
-        self.rect.center = [900, random.choice(range(10, 490))
+        self.rect.center = [850, random.choice(range(10, 490))
                             ]
 
     def update(self, vel):
@@ -169,7 +178,7 @@ class Coin(pygame.sprite.Sprite):
         super().__init__()
         self.image = COIN
         self.rect = self.image.get_rect()
-        self.rect.center = [900, random.choice(range(10, 490))
+        self.rect.center = [850, random.choice(range(10, 490))
                             ]
 
     def update(self, vel):
@@ -183,7 +192,22 @@ class Jewel(pygame.sprite.Sprite):
         super().__init__()
         self.image = JEWEL
         self.rect = self.image.get_rect()
-        self.rect.center = [900, random.choice(range(10, 490))
+        self.rect.center = [850, random.choice(range(10, 490))
+                            ]
+
+    def update(self, vel):
+        self.rect.x -= vel
+        if self.rect.right <= -100:
+            self.kill()
+
+
+class Slowed_Time(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = CLOCK
+        self.rect = self.image.get_rect()
+        self.rect.center = [850, random.choice(range(10, 490))
+
                             ]
 
     def update(self, vel):
