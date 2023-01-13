@@ -19,9 +19,7 @@ RED = (255, 0, 0)
 YELLOW = (225, 255, 0)
 
 FPS = 60
-# vel = 5
-ACCELERATION = 1.5
-MAX_BULLETS = 3
+STARTING_VELOCITY = 5
 
 # EVENTS
 
@@ -117,13 +115,7 @@ class Rocketship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [pos_x, pos_y]
         self.score = 0
-
-    def move(self, vel, mines_group):
-        keys_pressed = pygame.key.get_pressed()
-        if keys_pressed[pygame.K_UP] and self.rect.y - vel > 0:  # UP
-            self.rect.y -= vel
-        if keys_pressed[pygame.K_DOWN] and self.rect.y + vel + self.rect.height < HEIGHT:  # DOWN
-            self.rect.y += vel
+        self.vel = STARTING_VELOCITY
 
     def handle_mine_collision(self, mines_group, WIN):
         if pygame.sprite.spritecollide(self, mines_group, True):
@@ -131,7 +123,7 @@ class Rocketship(pygame.sprite.Sprite):
 
             explosion = pygame.Rect(
                 self.rect.x, self.rect.y, EXPLOSION_DIM, EXPLOSION_DIM)
-            draw_text = MAIN_FONT.render("you lose!", 1, WHITE)
+            draw_text = MAIN_FONT.render("Game Over!", 1, WHITE)
             WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() //
                                  2, HEIGHT/2 - draw_text.get_height()//2))
             WIN.blit(EXPLOSION, (explosion.x, explosion.y))
@@ -151,11 +143,22 @@ class Rocketship(pygame.sprite.Sprite):
             self.score += 5
 
     def update(self):
+        # moving:
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[pygame.K_UP] and self.rect.y - self.vel > 0:  # UP
+            self.rect.y -= self.vel
+        if keys_pressed[pygame.K_DOWN] and self.rect.y + self.vel + self.rect.height < HEIGHT:  # DOWN
+            self.rect.y += self.vel
+
+        # rendering score:
         score_text = MAIN_FONT.render(
             "Score: " + str(self.score), 1, WHITE)
 
         WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
                                2, 10))
+
+        # increasing velocity
+        self.vel += .001
 
 
 class Mine(pygame.sprite.Sprite):
@@ -168,8 +171,8 @@ class Mine(pygame.sprite.Sprite):
         self.rect.center = [900, random.choice(range(10, 490))
                             ]
 
-    def update(self):
-        self.rect.x -= 5
+    def update(self, vel):
+        self.rect.x -= vel
         if self.rect.right <= -100:
             self.kill()
 
@@ -184,8 +187,8 @@ class Coin(pygame.sprite.Sprite):
         self.rect.center = [900, random.choice(range(10, 490))
                             ]
 
-    def update(self):
-        self.rect.x -= 5
+    def update(self, vel):
+        self.rect.x -= vel
         if self.rect.right <= -100:
             self.kill()
 
@@ -200,7 +203,7 @@ class Jewel(pygame.sprite.Sprite):
         self.rect.center = [900, random.choice(range(10, 490))
                             ]
 
-    def update(self):
-        self.rect.x -= 5
+    def update(self, vel):
+        self.rect.x -= vel
         if self.rect.right <= -100:
             self.kill()
