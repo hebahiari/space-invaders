@@ -26,9 +26,6 @@ MAX_BULLETS = 3
 # EVENTS
 
 MINE_HIT = pygame.USEREVENT + 1
-COIN_COLLECT = pygame.USEREVENT + 2
-JEWEL_COLLECT = pygame.USEREVENT + 3
-CLOCK_COLLECT = pygame.USEREVENT + 4
 CREATE_MINE = pygame.USEREVENT + 5
 CREATE_JEWEL = pygame.USEREVENT + 6
 CREATE_COIN = pygame.USEREVENT + 7
@@ -147,7 +144,11 @@ class Rocketship(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, coins_group, True):
             COIN_SOUND.play()
             self.score += 1
-            print(self.score)
+
+    def handle_jewel_pickup(self, jewels_group):
+        if pygame.sprite.spritecollide(self, jewels_group, True):
+            JEWEL_SOUND.play()
+            self.score += 5
 
     def update(self):
         score_text = MAIN_FONT.render(
@@ -164,7 +165,7 @@ class Mine(pygame.sprite.Sprite):
             pygame.image.load(
                 os.path.join('Assets', 'mine.png')), (MINE_DIM, MINE_DIM))
         self.rect = self.image.get_rect()
-        self.rect.center = [800, random.choice(range(10, 490))
+        self.rect.center = [900, random.choice(range(10, 490))
                             ]
 
     def update(self):
@@ -180,7 +181,23 @@ class Coin(pygame.sprite.Sprite):
             pygame.image.load(
                 os.path.join('Assets', 'coin.png')), (COIN_DIM, COIN_DIM))
         self.rect = self.image.get_rect()
-        self.rect.center = [800, random.choice(range(10, 490))
+        self.rect.center = [900, random.choice(range(10, 490))
+                            ]
+
+    def update(self):
+        self.rect.x -= 5
+        if self.rect.right <= -100:
+            self.kill()
+
+
+class Jewel(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(
+            pygame.image.load(
+                os.path.join('Assets', 'jewel.png')), (JEWEL_DIM, JEWEL_DIM))
+        self.rect = self.image.get_rect()
+        self.rect.center = [900, random.choice(range(10, 490))
                             ]
 
     def update(self):

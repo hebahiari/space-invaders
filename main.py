@@ -2,7 +2,7 @@ import pygame
 import os
 import random
 import sys
-from sprites import Rocketship, Mine, Coin
+from sprites import Rocketship, Mine, Coin, Jewel
 
 pygame.font.init()
 pygame.mixer.init()
@@ -104,35 +104,19 @@ MAIN_FONT = pygame.font.SysFont('consolas', 30)
 # FUNCTION DEFINITIONS
 
 
-def draw_window(jewels, coins, score, rocketship_group, mines_group, coins_group
+def draw_window(rocketship_group, mines_group, coins_group, jewels_group
                 ):
     WIN.blit(SPACE, (0, 0))
-    # pygame.draw.rect(WIN, BLACK, BARRIER)
     rocketship_group.draw(WIN)
     rocketship_group.update()
     mines_group.draw(WIN)
     coins_group.draw(WIN)
+    jewels_group.draw(WIN)
     mines_group.update()
     coins_group.update()
-
-    # score_text = MAIN_FONT.render(
-    #     "Score: " + str(score), 1, WHITE)
-
-    # WIN.blit(score_text,  (WIDTH/2 - score_text.get_width() //
-    #          2, 10))
+    jewels_group.update()
 
     pygame.display.update()
-
-
-def handle_jewels(jewels, rocket, vel):
-    for jewel in jewels:
-        jewel.x -= vel
-        if jewel.x < 0 - JEWEL_DIM:
-            jewels.remove(jewel)
-        if rocket.colliderect(jewel):
-            JEWEL_SOUND.play()
-            pygame.event.post(pygame.event.Event(JEWEL_COLLECT))
-            jewels.remove(jewel)
 
 
 def draw_winner(text):
@@ -149,13 +133,6 @@ def main():
     pygame.time.set_timer(CREATE_JEWEL, 8000)
     pygame.time.set_timer(CREATE_COIN, 800)
 
-    # pycame.Rect() to basically define a rectangle to represent our object
-    rocket = pygame.Rect(100, 350, ROCKET_WIDTH, ROCKET_HEIGHT)
-
-    coins = []
-    jewels = []
-    mines = []
-    score = 0
     vel = 5
 
 # rocketship
@@ -169,6 +146,9 @@ def main():
 # coins
     coins_group = pygame.sprite.Group()
 
+# jewels
+    jewels_group = pygame.sprite.Group()
+
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -181,20 +161,14 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            if event.type == COIN_COLLECT:
-                score += 1
-
             if event.type == CLOCK_COLLECT:
                 TIMER_SOUND.play()
-
-            if event.type == JEWEL_COLLECT:
-                score += 5
 
             if event.type == CREATE_MINE:
                 mines_group.add(Mine())
 
             if event.type == CREATE_JEWEL:
-                coins_group.add(Coin())
+                jewels_group.add(Jewel())
 
             if event.type == CREATE_COIN:
                 coins_group.add(Coin())
@@ -205,9 +179,8 @@ def main():
         rocketship.move(vel, mines_group)
         rocketship.handle_mine_collision(mines_group, WIN)
         rocketship.handle_coin_pickup(coins_group)
-        # handle_jewels(jewels, rocket, vel)
-        # handle_coins(coins, rocket, vel)
-        draw_window(jewels, coins, score, rocketship_group, mines_group, coins_group
+        rocketship.handle_jewel_pickup(jewels_group)
+        draw_window(rocketship_group, mines_group, coins_group, jewels_group
                     )
 
     main()
